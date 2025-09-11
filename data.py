@@ -129,7 +129,7 @@ def load_data_in_splits(config: Dict[str, Any]) -> Tuple[pd.DataFrame]:
     # df = pd.concat([df, df2], ignore_index=True)
 
     # Create test, validation and train split
-    dish_ids = [f for f in os.listdir("data/realsense_overhead")]
+    dish_ids = [f for f in os.listdir(os.path.join(DATA_DIR, "images"))]
     random.shuffle(dish_ids)
     train_split_idx = int(len(dish_ids) * config["train_split_percentage"])
     val_split_idx = int(len(dish_ids) * (config["train_split_percentage"] + config["validation_split_percentage"]))
