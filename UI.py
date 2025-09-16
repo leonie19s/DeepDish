@@ -10,7 +10,7 @@ import io
 CONFIG = {
     "run_name": "UnfreezeLastTwoLayers250Epochs",
     "backbone": "dinov2",
-    "checkpoint": "ressouces/deepdish_model.pt",
+    "checkpoint": "ressouces/test_run_cont.pt",
     "device": "cuda",
     "epochs": 250,
     "learning_rate": 4e-4,
@@ -63,15 +63,18 @@ def display_page():
     with ui.column().classes('w-full items-center gap-4 mt-8'):
         ui.image(uploaded_img['src']).classes('max-w-sm max-h-96')
         if result:
-            ui.label(f'kcal: {result["calories"]}').classes('text-lg font-medium text-center')
+            
             # Pie chart
-            fat_kcal_ratio = result["fat"] * 9 / result["calories"]
-            carb_kcal_ratio = result["carb"] * 4 / result["calories"]
-            protein_kcal_ratio = result["protein"] * 4 / result["calories"]
+            fat_kcal_ratio = round(result["fat"] * 9 / result["calories"], ndigits=2)
+            carb_kcal_ratio = round(result["carb"] * 4 / result["calories"], ndigits=2)
+            protein_kcal_ratio = round(result["protein"] * 4 / result["calories"], ndigits=2)
+            plot_labels = [f"P: {protein_kcal_ratio*100}%", f"C: {carb_kcal_ratio*100}%", f"F: {fat_kcal_ratio*100}%"]
             with ui.pyplot(figsize=(3, 2)):
                 #plt.pie([33,33,33])
-                plt.pie([protein_kcal_ratio,carb_kcal_ratio,fat_kcal_ratio], labels=["Protein", "Carb", "Fat"])
+                plt.pie([protein_kcal_ratio,carb_kcal_ratio,fat_kcal_ratio], labels=plot_labels)
+                ui.label(f'kcal: {result["calories"]}').classes('text-lg font-medium text-center')
                 ui.label(f'Protein: {result["protein"]}g  Carbs: {result["carb"]}g  Fats: {result["fat"]}g')
+                plt.title("Relative Calorie Distribution")
         ui.button('Back', on_click=lambda: ui.navigate.to('/'))
 
 def make_prediction(image):
@@ -89,7 +92,7 @@ def make_prediction(image):
         values = output.squeeze(0).detach().cpu().numpy()
         class_names = ["calories", "mass", "fat", "carb", "protein"]
         global result
-        result = {name: round(float(val), ndigits=2) for name, val in zip(class_names, values)}
+        result = {name: round(abs(float(val)), ndigits=2) for name, val in zip(class_names, values)}
         print(result)
     return result
 
